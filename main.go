@@ -7,7 +7,6 @@ import (
 
 	_ "net/http/pprof"
 
-	"bitbucket.org/danielper/util/msg"
 	cors "github.com/AdhityaRamadhanus/fasthttpcors"
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -18,9 +17,12 @@ func main() {
 	counter := time.Now()
 	log.SetPrefix("[ LOGOUR ] ")
 
-	closeKafka := msg.NewKafkaProducer()
+	dbSession, err := connectScylla()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	defer closeKafka()
+	defer dbSession.Close()
 
 	router, listener := setupHTTPReusePort()
 

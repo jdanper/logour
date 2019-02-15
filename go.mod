@@ -14,7 +14,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21
 	github.com/eapache/queue v1.1.0
 	github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb
-	github.com/gocql/gocql v0.0.0-20180908093426-fccc30827404
+	github.com/gocql/gocql v0.0.0-20190208221138-c53c3654dc8a
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed
 	github.com/json-iterator/go v1.1.5

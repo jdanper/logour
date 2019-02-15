@@ -61,7 +61,7 @@ func BuildEvent(rawEvent []byte, reqInfo *RequestInfo) {
 
 	event, _ = jsonparser.Set(event, toByteArray(time.Now().Format("2006-01-02")), "event_savedat")
 
-	go produce(event)
+	go insert(event)
 }
 
 func extractBasicData(event []byte, reqInfo *RequestInfo) []byte {
