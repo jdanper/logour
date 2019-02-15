@@ -1,24 +1,11 @@
-FROM isuper/java-oracle:jdk_8
+FROM 1.11.5-alpine3.9 as builder
 
-COPY gookie-pool /root/gookie-pool
+ADD . /app
 
-ENV MONGO_PASSWORD=""
-ENV MONGO_USER=""
-ENV CASSANDRA_PASSWORD="cassandra"
-ENV DB_IICCASSANDRAANALYTICS_PASS="cassandra"
-ENV DB_IICCASSANDRAANALYTICS_USER="cassandra"
-ENV DB_IICCASSANDRAADMIN_PASS="cassandra"
-ENV DB_IICCASSANDRAADMIN_USER="cassandra"
-ENV MONGO_HOST="cache2"
-ENV MONGO_POST="27017"
-ENV MONGO_RPS="true"
-ENV CASSANDRA_HOST="172.31.80.12"
-ENV CASSANDRA_PORT="9042"
-ENV KAFKA_HOST="kafka1,kafka2"
+# TODO: add build stage
 
-
-WORKDIR /root
+WORKDIR /app
 
 EXPOSE 8080
 
-CMD ["./gookie-pool"]
+ENTRYPOINT ["logour"]

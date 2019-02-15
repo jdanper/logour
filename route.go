@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
-	"net/http"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -18,29 +16,13 @@ func MountRoutes(r *fasthttprouter.Router) {
 		fmt.Fprintf(c, "OK")
 	})
 
-	r.OPTIONS(appContext+"/hit", func(c *fasthttp.RequestCtx) {
-		c.Response.Header.Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		c.Response.Header.Set("Access-Control-Allow-Origin", "*")
-		c.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type")
-		c.SetStatusCode(http.StatusNoContent)
-	})
-
-	r.POST(appContext+"/hit/:cid", func(ctx *fasthttp.RequestCtx) {
-		xcred := ctx.Request.Header.Peek("X-CRED")
+	r.POST(appContext+"/event", func(ctx *fasthttp.RequestCtx) {
 		reqInfo := extractReqInfo(ctx)
-		info := make(chan *ClientInfo)
 
-		go BuildHit(ctx.PostBody(), reqInfo, xcred, info)
+		go BuildEvent(ctx.PostBody(), reqInfo)
 
-		res := <-info
-		header, err := json.Marshal(res)
-		if err != nil {
-			ctx.SetStatusCode(500)
-			return
-		}
-
-		ctx.Response.Header.Add("X-CRED", base64.StdEncoding.EncodeToString(header))
 		fmt.Fprint(ctx, "OK")
+
 		ctx.SetStatusCode(200)
 
 		ctx.SetConnectionClose()
@@ -48,10 +30,11 @@ func MountRoutes(r *fasthttprouter.Router) {
 }
 
 func extractReqInfo(ctx *fasthttp.RequestCtx) *RequestInfo {
-	cid, _ := ctx.UserValue("cid").(string)
+	client := ctx.Request.Header.Peek("X-LOGOUR-TOKEN")
+
 	return &RequestInfo{
 		IP:        ctx.RemoteAddr().String(),
-		Channel:   cid,
+		Client:    string(client),
 		UserAgent: string(ctx.UserAgent()),
 	}
 }

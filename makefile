@@ -4,7 +4,7 @@ CLEAN	= go clean -i -cache
 TEST	= go test
 ADDPKG	= go get
 INSTALL = go install
-BINARY_NAME = gookie
+BINARY_NAME = logour
 
 all: test build
 build:

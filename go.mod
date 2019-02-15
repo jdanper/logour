@@ -1,12 +1,14 @@
 module github.com/jdanper/logour
 
 require (
-	bitbucket.org/danielper/util v0.0.0-20181217024055-c1b3674005e3
+	bitbucket.org/danielper/util v0.0.0-20190202032827-21720e0366c9
+	github.com/AdhityaRamadhanus/fasthttpcors v0.0.0-20170121111917-d4c07198763a
 	github.com/DataDog/zstd v1.3.5 // indirect
 	github.com/Shopify/sarama v1.20.1 // indirect
 	github.com/arangodb/go-driver v0.0.0-20190123094303-4da7b19c6d72 // indirect
 	github.com/buaazp/fasthttprouter v0.1.1
 	github.com/buger/jsonparser v0.0.0-20180808090653-f4dd9f5a6b44
+	github.com/confluentinc/confluent-kafka-go v0.11.6 // indirect
 	github.com/davecgh/go-spew v1.1.1
 	github.com/eapache/go-resiliency v1.1.0
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21
