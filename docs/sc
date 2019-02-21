@@ -1,4 +1,0 @@
-get events via http
-get events via kafka
-default payload
-additional data normalized and stored in 'data' column

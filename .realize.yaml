@@ -5,13 +5,20 @@ settings:
 schema:
 - name: logour
   path: .
-  commands: {}
+  commands: 
+    install:
+      status: true
+      method: make build
+    run:
+      status: true
+      method: ./logour
   watcher:
     extensions:
     - go
     paths:
     - /
-    ignored_paths:
-    - .git
-    - .realize
-    - vendor
+    ignore:
+      paths:
+      - .git
+      - .realize
+      - vendor

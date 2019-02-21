@@ -1,109 +1,74 @@
 package main
 
 import (
-	"bytes"
-	"encoding/gob"
-	"fmt"
-	"strings"
+	"errors"
+	"log"
 	"time"
 
-	"github.com/buger/jsonparser"
+	"github.com/gocql/gocql"
 )
 
-const (
-	mobileName  = "mobile"
-	desktopName = "desktop"
-	serverName  = "server"
-)
+var eventKinds = []string{"warning", "error", "info", "debug"}
 
-// RequestInfo represents the required values from request itself
-type RequestInfo struct {
+type event struct {
+	ID         gocql.UUID
+	Hostname   string              `json:"hostname"`
+	Kind       string              `json:"type"`
+	Action     string              `json:"action"`
+	Message    string              `json:"message"`
+	CreatedAt  time.Time           `json:"created_at"`
+	CustomData map[string]struct{} `json:"custom"`
+
 	IP        string
-	Client    string
 	UserAgent string
+	SavedAt   time.Time
 }
 
-// GetDeviceType parses the user-agent string
-func (req *RequestInfo) GetDeviceType() string {
+func process(rawEvent []byte, reqInfo *RequestInfo) {
+	evt, err := buildEvent(rawEvent, reqInfo)
 
-	dvcType := serverName
-
-	lowerUserAgnt := strings.ToLower(req.UserAgent)
-
-	if strings.Contains(lowerUserAgnt, desktopName) {
-		dvcType = desktopName
-	}
-
-	if strings.Contains(lowerUserAgnt, mobileName) {
-		dvcType = mobileName
-	}
-
-	return dvcType
-}
-
-// BuildEvent creates a event from
-func BuildEvent(rawEvent []byte, reqInfo *RequestInfo) {
-	if !isEventCompliant(rawEvent) {
+	if err != nil {
+		log.Println(err.Error())
 		return
 	}
 
-	event := jsonparser.StringToBytes("{}")
-
-	event = extractBasicData(rawEvent, reqInfo)
-	custom := getObject(rawEvent, "data")
-
-	event, _ = jsonparser.Set(event, toByteArray(reqInfo.IP), "ip")
-	event, _ = jsonparser.Set(event, toByteArray(reqInfo.UserAgent), "useragent")
-	event, _ = jsonparser.Set(event, toByteArray(reqInfo.Client), "client_id")
-	event, _ = jsonparser.Set(event, toByteArray(reqInfo.GetDeviceType()), "dvc_type")
-
-	event, _ = jsonparser.Set(event, custom, "custom_data")
-
-	event, _ = jsonparser.Set(event, toByteArray(time.Now().Format("2006-01-02")), "event_savedat")
-
-	go insert(event)
+	go insert(evt)
 }
 
-func extractBasicData(event []byte, reqInfo *RequestInfo) []byte {
-	basicData, _, _, _ := jsonparser.Get(event, "hostname")
-	basicData, _, _, _ = jsonparser.Get(event, "type")
-	basicData, _, _, _ = jsonparser.Get(event, "action")
-	basicData, _, _, _ = jsonparser.Get(event, "message")
-	basicData, _, _, _ = jsonparser.Get(event, "user")
-
-	return basicData
-}
-
-func toByteArray(content string) []byte {
-	return []byte(fmt.Sprintf(`"%s"`, content))
-}
-
-func getObject(source []byte, key string) []byte {
-	obj, _, _, err := jsonparser.Get(source, key)
-
-	if err != nil {
-		return jsonparser.StringToBytes("{}")
+func buildEvent(rawEvent []byte, reqInfo *RequestInfo) (*event, error) {
+	if !json.Valid(rawEvent) {
+		return nil, errors.New("invalid json payload")
 	}
 
-	return obj
-}
+	content := &event{}
+	json.Unmarshal(rawEvent, content)
 
-func isEventCompliant(event []byte) bool {
-	buff := &bytes.Buffer{}
-
-	requiredKeyNames := []string{"hostname", "type", "action", "message"}
-	gob.NewEncoder(buff).Encode(requiredKeyNames)
-
-	requiredKeys := buff.Bytes()
-
-	var keys []byte
-	jsonparser.EachKey(event, func(indx int, key []byte, t jsonparser.ValueType, err error) {
-		keys = append(keys, key...)
-	})
-
-	if !bytes.Contains(keys, requiredKeys) {
-		return false
+	if !content.isValid() {
+		return nil, errors.New("invalid event data")
 	}
 
-	return true
+	content.IP = reqInfo.IP
+	content.UserAgent = reqInfo.UserAgent
+	content.SavedAt = time.Now()
+
+	return content, nil
+}
+
+func (e *event) isValid() bool {
+	valid := (e.Hostname != "" &&
+		e.Action != "" &&
+		e.Message != "")
+
+	valid = e.Kind != "" && contains(e.Kind)
+
+	return valid
+}
+
+func contains(src string) bool {
+	for _, n := range eventKinds {
+		if src == n {
+			return true
+		}
+	}
+	return false
 }
