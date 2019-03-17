@@ -17,14 +17,13 @@ var (
 
 	session *gocql.Session
 
-	columns = []string{"id", "hostname", "kind", "action", "message", "custom_data", "ip", "user_agent", "saved_at", "created_at"}
+	columns = []string{"id", "client", "hostname", "kind", "message", "json_data", "remote_address", "user_agent", "saved_at", "created_at"}
 )
 
 func connectScylla() (*gocql.Session, error) {
 	cluster := gocql.NewCluster(strings.Split(hosts, ",")...)
 
 	cluster.Keyspace = keyspace
-	// cluster.ProtoVersion = 4
 
 	cluster.Consistency = gocql.Any
 
@@ -38,6 +37,7 @@ func insert(content *event) {
 	content.ID = gocql.TimeUUID()
 
 	stmt, names := qb.Insert(keyspace + ".event").Columns(columns...).ToCql()
+
 	q := gocqlx.Query(session.Query(stmt), names).BindStruct(content)
 
 	if err := q.ExecRelease(); err != nil {

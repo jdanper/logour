@@ -39,11 +39,8 @@ func mountRoutes(r *fasthttprouter.Router) {
 }
 
 func extractReqInfo(ctx *fasthttp.RequestCtx) *RequestInfo {
-	client := ctx.Request.Header.Peek("X-LOGOUR-TOKEN")
-
 	return &RequestInfo{
 		IP:        ctx.RemoteAddr().String(),
-		Client:    string(client),
 		UserAgent: string(ctx.UserAgent()),
 	}
 }

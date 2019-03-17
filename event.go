@@ -8,20 +8,26 @@ import (
 	"github.com/gocql/gocql"
 )
 
-var eventKinds = []string{"warning", "error", "info", "debug"}
+var eventKinds = []string{"WARNING", "ERROR", "INFO", "DEBUG"}
+
+type eventPayload struct {
+	ID         gocql.UUID
+	Client     string                 `json:"client"`
+	Hostname   string                 `json:"hostname"`
+	Kind       string                 `json:"type"`
+	Message    string                 `json:"message"`
+	CreatedAt  int64                  `json:"createdAt"`
+	CustomJSON map[string]interface{} `json:"custom"`
+
+	RemoteAddress string
+	UserAgent     string
+	SavedAt       time.Time
+}
 
 type event struct {
-	ID         gocql.UUID
-	Hostname   string              `json:"hostname"`
-	Kind       string              `json:"type"`
-	Action     string              `json:"action"`
-	Message    string              `json:"message"`
-	CreatedAt  time.Time           `json:"created_at"`
-	CustomData map[string]struct{} `json:"custom"`
-
-	IP        string
-	UserAgent string
-	SavedAt   time.Time
+	*eventPayload
+	CreatedAt time.Time
+	JSONData  string
 }
 
 func process(rawEvent []byte, reqInfo *RequestInfo) {
@@ -40,24 +46,38 @@ func buildEvent(rawEvent []byte, reqInfo *RequestInfo) (*event, error) {
 		return nil, errors.New("invalid json payload")
 	}
 
-	content := &event{}
+	content := &eventPayload{}
 	json.Unmarshal(rawEvent, content)
 
 	if !content.isValid() {
 		return nil, errors.New("invalid event data")
 	}
 
-	content.IP = reqInfo.IP
+	event := &event{eventPayload: content}
+
+	content.RemoteAddress = reqInfo.IP
 	content.UserAgent = reqInfo.UserAgent
 	content.SavedAt = time.Now()
 
-	return content, nil
+	createdAt := time.Unix(content.CreatedAt, 0)
+	event.CreatedAt = createdAt
+
+	custJSON, err := json.Marshal(content.CustomJSON)
+	if err != nil {
+		log.Println("unable to parse map to json string")
+	}
+
+	event.JSONData = string(custJSON)
+
+	log.Println(event.JSONData)
+
+	log.Println(custJSON)
+
+	return event, nil
 }
 
-func (e *event) isValid() bool {
-	valid := (e.Hostname != "" &&
-		e.Action != "" &&
-		e.Message != "")
+func (e *eventPayload) isValid() bool {
+	valid := (e.Hostname != "" && e.Message != "" && e.Client != "")
 
 	valid = e.Kind != "" && contains(e.Kind)
 
