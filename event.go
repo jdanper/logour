@@ -79,16 +79,17 @@ func buildEvent(rawEvent []byte, reqInfo *RequestInfo) (*event, error) {
 func (e *eventPayload) isValid() bool {
 	valid := (e.Hostname != "" && e.Message != "" && e.Client != "")
 
-	valid = e.Kind != "" && contains(e.Kind)
+	valid = e.Kind != "" && containsKind(e.Kind)
 
 	return valid
 }
 
-func contains(src string) bool {
+func containsKind(src string) bool {
 	for _, n := range eventKinds {
 		if src == n {
 			return true
 		}
 	}
+
 	return false
 }

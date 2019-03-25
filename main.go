@@ -45,7 +45,7 @@ func main() {
 func getCorsHandler() *cors.CorsHandler {
 	return cors.NewCorsHandler(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedHeaders:   []string{"X-LOGOUR-TOKEN", "Content-Type"},
+		AllowedHeaders:   []string{"Content-Type"},
 		AllowedMethods:   []string{"GET", "POST"},
 		AllowCredentials: false,
 		AllowMaxAge:      5600,
