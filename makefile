@@ -2,12 +2,12 @@
 BUILD	= go build
 CLEAN	= go clean -i -cache
 TEST	= go test
-ADDPKG	= go get
 INSTALL = go install
+ADDPKG  = dep ensure
 BINARY_NAME = logour
 
 all: test build
-build:
+build: clean deps test
 	$(BUILD) -o $(BINARY_NAME) -v
 test:
 	$(TEST) -v ./...
@@ -17,6 +17,6 @@ clean:
 run: build
 	./$(BINARY_NAME)
 deps:
-	$(ADDPKG) -v
-install: clean test
+	$(ADDPKG)
+install: build
 	$(INSTALL)
