@@ -18,7 +18,6 @@ type DB struct {
 
 // Database defines basic database operations
 type Database interface {
-
 	Close()
 	Insert(evt *event)
 }

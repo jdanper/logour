@@ -6,7 +6,7 @@ import (
 )
 
 var reqInfo = &RequestInfo{
-	IP: "127.0.0.1",
+	IP:        "127.0.0.1",
 	UserAgent: "test user agent",
 }
 
@@ -15,7 +15,6 @@ func TestRequestInfo_GetDeviceType(t *testing.T) {
 
 	assert.Equal(t, "server", device, "resolved user agent must be server")
 }
-
 
 func TestRequestInfo_GetDesktopDeviceType(t *testing.T) {
 	reqInfo.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"

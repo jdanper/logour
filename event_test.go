@@ -45,12 +45,10 @@ const malformedCustomEventJSON = `
 	"custom":{--}
 }`
 
-
 var requestInfo = &RequestInfo{
 	IP:        "127.0.0.1",
 	UserAgent: "test agent",
 }
-
 
 func BenchmarkBuildEvent(b *testing.B) {
 }
@@ -121,18 +119,19 @@ func Test_notContainsMandatoryFields(t *testing.T) {
 	assert.Error(t, err, "should block invalid or empty mandatory fields")
 }
 
-type testDB struct {}
+type testDB struct{}
+
 func (db *testDB) Insert(content *event) {}
-func (db *testDB) Close() {}
+func (db *testDB) Close()                {}
 
 func Test_createEvent(t *testing.T) {
-	err :=createEvent([]byte(eventJSON), requestInfo, &testDB{})
+	err := createEvent([]byte(eventJSON), requestInfo, &testDB{})
 
 	assert.NoError(t, err, "must create without errors")
 }
 
 func Test_createInvalidEvent(t *testing.T) {
-	err :=createEvent([]byte(invalidEventJSON), requestInfo, &testDB{})
+	err := createEvent([]byte(invalidEventJSON), requestInfo, &testDB{})
 
 	assert.Error(t, err, "must end with error")
 }

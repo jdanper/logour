@@ -23,7 +23,7 @@ func mountRoutes(r *fasthttprouter.Router, db *DB) {
 
 	r.GET(appContext+"/health", func(c *fasthttp.RequestCtx) {
 		_, err := fmt.Fprintf(c, "OK")
-		if err !=nil {
+		if err != nil {
 			log.Println("Unable to saveEvent http request")
 		}
 	})
