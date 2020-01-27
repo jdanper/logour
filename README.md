@@ -27,4 +27,4 @@ Environment variables needed:
 * `DATABASE_HOSTS` defaults to `localhost`
 * `DATABASE_KEYSPACE` defaults to `logour`
 
-Build the binary and run with `./logour`
+Build the binary then run with `./logour`
