@@ -23,8 +23,8 @@ type Database interface {
 }
 
 var (
-	hosts    = util.GetEnvOrDefault("SCYLLA_HOSTS", "localhost")
-	keyspace = util.GetEnvOrDefault("SCYLLA_KEYSPACE", "logour")
+	hosts    = util.GetEnvOrDefault("DATABASE_HOSTS", "localhost")
+	keyspace = util.GetEnvOrDefault("DATABASE_KEYSPACE", "logour")
 
 	columns = []string{"id", "client", "hostname", "kind", "message", "json_data", "remote_address", "user_agent", "saved_at", "created_at"}
 )
