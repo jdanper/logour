@@ -1,11 +1,16 @@
-FROM 1.11.5-alpine3.9 as builder
+FROM golang:1.13.6-buster
 
-ADD . /app
+WORKDIR /go/src/github.com/jdanper/logour
+COPY . .
 
-# TODO: add build stage
+RUN go get -u github.com/golang/dep/...
+RUN make build
 
-WORKDIR /app
+FROM alpine:3.11.3
 
-EXPOSE 8080
+RUN apk --no-cache add ca-certificates
 
-ENTRYPOINT ["logour"]
+WORKDIR /root/
+COPY logour .
+
+CMD ["./logour"]
