@@ -4,33 +4,31 @@ import (
 	"strings"
 )
 
-const (
-	mobileName  = "mobile"
-	desktopName = "desktop"
-	serverName  = "server"
-)
+var userAgentDevices = []string{
+	"mobile",
+	"windows",
+	"cros",
+	"macintosh",
+	"x11",
+}
+
+const serverText = "server"
 
 // RequestInfo represents the required values from request itself
 type RequestInfo struct {
 	IP        string
-	Client    string
 	UserAgent string
 }
 
 // GetDeviceType parses the user-agent string
 func (req *RequestInfo) GetDeviceType() string {
-
-	dvcType := serverName
-
 	lowerUserAgnt := strings.ToLower(req.UserAgent)
 
-	if strings.Contains(lowerUserAgnt, desktopName) {
-		dvcType = desktopName
+	for _, v := range userAgentDevices {
+		if strings.Contains(lowerUserAgnt, v) {
+			return v
+		}
 	}
 
-	if strings.Contains(lowerUserAgnt, mobileName) {
-		dvcType = mobileName
-	}
-
-	return dvcType
+	return serverText
 }

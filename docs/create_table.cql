@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS logour.event (
     kind text,
     message text,
     user_agent text,
-    PRIMARY KEY (id, saved_at)
-) WITH CLUSTERING ORDER BY (saved_at DESC);
+    PRIMARY KEY (kind, created_at, client)
+) WITH CLUSTERING ORDER BY (created_at DESC);

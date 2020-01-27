@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 
 var eventKinds = []string{"WARNING", "ERROR", "INFO", "DEBUG"}
 
-type eventPayload struct {
+type payload struct {
 	ID         gocql.UUID
 	Client     string                 `json:"client"`
 	Hostname   string                 `json:"hostname"`
@@ -25,68 +24,76 @@ type eventPayload struct {
 }
 
 type event struct {
-	*eventPayload
+	*payload
 	CreatedAt time.Time
 	JSONData  string
 }
 
-func process(rawEvent []byte, reqInfo *RequestInfo) {
+func createEvent(rawEvent []byte, reqInfo *RequestInfo, db Database) error {
 	evt, err := buildEvent(rawEvent, reqInfo)
 
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return err
 	}
 
-	go insert(evt)
+	go db.Insert(evt)
+
+	return nil
 }
 
 func buildEvent(rawEvent []byte, reqInfo *RequestInfo) (*event, error) {
-	if !json.Valid(rawEvent) {
-		return nil, errors.New("invalid json payload")
+	event, err := parseEvent(rawEvent)
+	if err != nil {
+		return nil, err
 	}
 
-	content := &eventPayload{}
-	json.Unmarshal(rawEvent, content)
-
-	if !content.isValid() {
-		return nil, errors.New("invalid event data")
+	if err = event.checkValid(); err != nil {
+		return nil, err
 	}
 
-	event := &event{eventPayload: content}
+	event.payload.RemoteAddress = reqInfo.IP
+	event.payload.UserAgent = reqInfo.UserAgent
+	event.payload.SavedAt = time.Now()
 
-	content.RemoteAddress = reqInfo.IP
-	content.UserAgent = reqInfo.UserAgent
-	content.SavedAt = time.Now()
-
-	createdAt := time.Unix(content.CreatedAt, 0)
+	createdAt := time.Unix(event.payload.CreatedAt, 0)
 	event.CreatedAt = createdAt
 
-	custJSON, err := json.Marshal(content.CustomJSON)
-	if err != nil {
-		log.Println("unable to parse map to json string")
-	}
+	customData, _ := json.Marshal(event.payload.CustomJSON)
 
-	event.JSONData = string(custJSON)
-
-	log.Println(event.JSONData)
-
-	log.Println(custJSON)
+	event.JSONData = string(customData)
 
 	return event, nil
 }
 
-func (e *eventPayload) isValid() bool {
-	valid := (e.Hostname != "" && e.Message != "" && e.Client != "")
+func parseEvent(rawEvent []byte) (*event, error) {
+	if !json.Valid(rawEvent) {
+		return nil, errInvalidJSON
+	}
 
-	valid = e.Kind != "" && containsKind(e.Kind)
+	eventPayload := &payload{}
+	_ = json.Unmarshal(rawEvent, eventPayload)
 
-	return valid
+	return &event{payload: eventPayload}, nil
 }
 
-func containsKind(src string) bool {
+func (e *payload) checkValid() error {
+	containsMandatory := e.Hostname != "" && e.Message != "" && e.Client != ""
+
+	if !containsMandatory {
+		return errEmptyMandatoryField
+	}
+
+	if !(e.Kind != "" && containsKind(e.Kind)) {
+		return errInvalidKind
+	}
+
+	return nil
+}
+
+func containsKind(kind string) bool {
 	for _, n := range eventKinds {
-		if src == n {
+		if kind == n {
 			return true
 		}
 	}

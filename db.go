@@ -11,36 +11,51 @@ import (
 	"github.com/scylladb/gocqlx/qb"
 )
 
+// DB wraps a database connection
+type DB struct {
+	session *gocql.Session
+}
+
+// Database defines basic database operations
+type Database interface {
+
+	Close()
+	Insert(evt *event)
+}
+
 var (
 	hosts    = util.GetEnvOrDefault("SCYLLA_HOSTS", "localhost")
 	keyspace = util.GetEnvOrDefault("SCYLLA_KEYSPACE", "logour")
 
-	session *gocql.Session
-
 	columns = []string{"id", "client", "hostname", "kind", "message", "json_data", "remote_address", "user_agent", "saved_at", "created_at"}
 )
 
-func connectScylla() (*gocql.Session, error) {
+func connectScylla() (*DB, error) {
 	cluster := gocql.NewCluster(strings.Split(hosts, ",")...)
 
 	cluster.Keyspace = keyspace
 
 	cluster.Consistency = gocql.Any
 
-	var err error
-	session, err = cluster.CreateSession()
+	session, err := cluster.CreateSession()
 
-	return session, err
+	return &DB{session}, err
 }
 
-func insert(content *event) {
+// Insert persists an event
+func (db *DB) Insert(content *event) {
 	content.ID = gocql.TimeUUID()
 
 	stmt, names := qb.Insert(keyspace + ".event").Columns(columns...).ToCql()
 
-	q := gocqlx.Query(session.Query(stmt), names).BindStruct(content)
+	q := gocqlx.Query(db.session.Query(stmt), names).BindStruct(content)
 
 	if err := q.ExecRelease(); err != nil {
 		log.Println(err)
 	}
+}
+
+// Close ends database connection
+func (db *DB) Close() {
+	db.session.Close()
 }

@@ -24,15 +24,15 @@ func main() {
 	counter := time.Now()
 	log.SetPrefix("[ LOGOUR ] ")
 
-	dbSession, err := connectScylla()
+	db, err := connectScylla()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Println("Database connected")
-	defer dbSession.Close()
+	defer db.Close()
 
-	router, listener := setupHTTP()
+	router, listener := setupHTTP(db)
 
 	log.Println("Application running at :" + httpPort)
 	log.Printf("Startup time: %s", time.Since(counter))
@@ -52,10 +52,10 @@ func getCorsHandler() *cors.CorsHandler {
 	})
 }
 
-func setupHTTP() (*fasthttprouter.Router, net.Listener) {
+func setupHTTP(db *DB) (*fasthttprouter.Router, net.Listener) {
 	router := fasthttprouter.New()
 
-	mountRoutes(router)
+	mountRoutes(router, db)
 
 	ln, err := reuseport.Listen("tcp4", "0.0.0.0:"+httpPort)
 	if err != nil {

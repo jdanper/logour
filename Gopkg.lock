@@ -20,6 +20,12 @@
   version = "v0.1.1"
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/gocql/gocql"
   packages = [".","internal/lru","internal/murmur","internal/streams"]
@@ -68,6 +74,12 @@
   version = "1.0.1"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/scylladb/go-reflectx"
   packages = ["."]
   revision = "8e28c7b74629f55b19259fcd798953ee195ec4a4"
@@ -78,6 +90,12 @@
   packages = [".","qb"]
   revision = "2265c3fdbb459cd8bd014fbd074b54810955e301"
   version = "v1.2.1"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/valyala/bytebufferpool"
@@ -103,9 +121,15 @@
   revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
   version = "v0.9.1"
 
+[[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "53403b58ad1b561927d19068c655246f2db79d48"
+  version = "v2.2.8"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "60faf03440d9d0801c730c7dd6996544e55ccf169f25e3c39412b598a7080a97"
+  inputs-digest = "e3fdb2e939793870486db8d71e5349d31c0f6d6cc48405ee0692a5ca8a8a622a"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -11,17 +12,20 @@ type response struct {
 	Message string `json:"message"`
 }
 
-const appContext = "/logour"
+const appContext = "/logour/v1"
 
 var (
 	strContentType     = []byte("Content-Type")
 	strApplicationJSON = []byte("application/json")
 )
 
-func mountRoutes(r *fasthttprouter.Router) {
+func mountRoutes(r *fasthttprouter.Router, db *DB) {
 
 	r.GET(appContext+"/health", func(c *fasthttp.RequestCtx) {
-		fmt.Fprintf(c, "OK")
+		_, err := fmt.Fprintf(c, "OK")
+		if err !=nil {
+			log.Println("Unable to saveEvent http request")
+		}
 	})
 
 	r.POST(appContext+"/event", func(ctx *fasthttp.RequestCtx) {
@@ -32,9 +36,9 @@ func mountRoutes(r *fasthttprouter.Router) {
 
 		reqInfo := extractReqInfo(ctx)
 
-		go process(ctx.PostBody(), reqInfo)
+		go createEvent(ctx.PostBody(), reqInfo, db)
 
-		end(ctx, 200, &response{Message: "OK"})
+		end(ctx, 200)
 	})
 }
 
@@ -45,7 +49,7 @@ func extractReqInfo(ctx *fasthttp.RequestCtx) *RequestInfo {
 	}
 }
 
-func end(ctx *fasthttp.RequestCtx, code int, obj interface{}) {
+func end(ctx *fasthttp.RequestCtx, code int) {
 	ctx.Response.Header.SetCanonical(strContentType, strApplicationJSON)
 	ctx.Response.SetStatusCode(code)
 
