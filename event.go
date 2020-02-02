@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -38,6 +39,7 @@ func createEvent(rawEvent []byte, reqInfo *RequestInfo, db Database) error {
 	}
 
 	go db.Insert(evt)
+	go notify(*evt)
 
 	return nil
 }
@@ -99,4 +101,8 @@ func containsKind(kind string) bool {
 	}
 
 	return false
+}
+
+func (e *event) String() string {
+	return fmt.Sprintf("%s - %s - %s - %s", e.CreatedAt, e.Kind, e.Client, e.Message)
 }

@@ -1,4 +1,4 @@
-FROM golang:1.13.6-buster
+FROM golang:1.13.6-buster AS builder
 
 WORKDIR /go/src/github.com/jdanper/logour
 COPY . .
@@ -11,6 +11,7 @@ FROM alpine:3.11.3
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
-COPY logour .
+
+COPY --from=builder /go/src/github.com/jdanper/logour/logour .
 
 CMD ["./logour"]
