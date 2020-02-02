@@ -26,5 +26,7 @@ Environment variables needed:
 * `HTTP_PORT` defaults to `8080`
 * `DATABASE_HOSTS` defaults to `localhost`
 * `DATABASE_KEYSPACE` defaults to `logour`
+* `SLACK_HOOK_URL` omit to disable the notification feature
+* `SLACK_NOTIFY_TYPES` comma separated values defining what event types should be span a notification. Defaults to `ERROR`
 
 Build the binary then run with `./logour`

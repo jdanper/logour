@@ -19,6 +19,13 @@ var webHookUrl = os.Getenv("SLACK_HOOK_URL")
 var plainRequiredKinds = os.Getenv("SLACK_NOTIFY_TYPES")
 
 func notify(evt event) {
+	if plainRequiredKinds == "" {
+		plainRequiredKinds = "ERROR"
+	}
+	if webHookUrl == "" {
+		return
+	}
+
 	if !mustNotify(evt.Kind, plainRequiredKinds) {
 		return
 	}
